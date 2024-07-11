@@ -1,0 +1,17 @@
+wandb
+gpustat
+transformers
+timm
+hydra-core
+scipy
+pandas
+scikit-learn
+coloredlogs
+matplotlib
+
+rotograd
+cvxpy
+cvxopt
+meshzoo
+torchmetrics==0.10.3
+pymoo==0.6.0.1

@@ -1,0 +1,99 @@
+# Getting started with RCP
+
+This guide builds upon https://github.com/epfml/getting-started.
+
+## Requirements
+
+[This guide](https://wiki.rcp.epfl.ch/home/CaaS/Quick_Start) is a good starting point for the requirements.
+
+1. Install docker and sudoless docker
+2. Install kubernetes
+   1. follow the instructions in the [wiki.rcp.epfl.ch](https://wiki.rcp.epfl.ch)
+3. Install runai using the instructions in the wiki
+   1. login to the RunAI platform using `runai login`. You should be able to run `runai whoami` afterwards
+4. `registry.rcp.epfl.ch`
+   1. go to registry.rcp.epfl.ch and login
+   2. create your project with the UI. Your project should be `lts4-$USERNAME` 
+   3. login with docker to the registry by `docker login registry.rcp.epfl.ch`
+5. Create a wandb secret and name it `wandb-secret`. This is needed for the wandb integration.
+6. `haas` 
+   1. Make sure you have access to the `haas` storage by running `ssh $USERNAME@haas001.rcp.epfl.ch`
+   2. go to your mounted volume (should be `/mnt/lts4/scratch` for most) and create a directory with your name via `mkdir -p /mnt/lts4/scratch/home/$USERNAME`. The launch script assumes that you have done so. 
+
+Now you can proceed with the next steps, building your docker image, pushing it to the registry and launching jobs.
+
+## Building your docker image
+
+The base image uses a specific pytorch image for reproducibility, adds several libraries, adds the current user 
+
+First step is to get your credential, get LDAP details and paste them below.
+```bash
+USERNAME=ndimitri
+
+ldapsearch -x -b o=epfl,c=ch -H ldaps://ldap.epfl.ch -LLL "(&(objectclass=person)(uid=$USERNAME))" uid uidNumber gidNumber
+```
+
+Copy them to the appropriate fields below.
+```bash
+LDAP_USERNAME=...
+LDAP_GROUPNAME=lts4
+LDAP_UID=...
+LDAP_GID=...
+
+REGISTRY=registry.rcp.epfl.ch
+IMG_NAME=base
+VERSION=v1
+
+CONTAINER=$REGISTRY/$LDAP_GROUPNAME-$LDAP_USERNAME/$IMG_NAME
+
+docker build -t $CONTAINER . \
+--build-arg LDAP_GID=$LDAP_GID \
+--build-arg LDAP_UID=$LDAP_UID \
+--build-arg LDAP_USERNAME=$USERNAME \
+--build-arg LDAP_GROUPNAME=$LDAP_GROUPNAME
+
+docker tag $CONTAINER $CONTAINER:$VERSION
+docker tag $CONTAINER $CONTAINER:latest
+docker push $CONTAINER --all-tags
+```
+
+
+## Launching a job
+
+More detailed information coming soon, take a look at the `launch.py` script for now.
+
+First, you need to change the details on `.config/info.yaml` to match your credentials. The `launch.py` script will use this file to get the necessary information.
+
+Interactive job
+```bash
+python launch.py \
+    --interactive \
+    --name=NAME_OF_JOB \
+    --shm=10 \
+    --gpus=1 \
+    --cpus=20 \
+    --image=CONTAINER_NAME:VERSION 
+```
+
+Training job
+```bash
+python launch.py \
+    --name=NAME_OF_JOB \
+    --shm=10 \
+    --gpus=1 \
+    --cpus=20 \
+    --image=CONTAINER_NAME:VERSION \
+    --command='cd path/to/code && python train.py --arg1=1 --arg2=2'
+```
+
+Do not launch but only print out the yaml config file
+```bash
+python launch.py \
+    --name=NAME_OF_JOB \
+    --shm=10 \
+    --gpus=1 \
+    --cpus=20 \
+    --image=CONTAINER_NAME:VERSION \
+    --command='cd path/to/code && python train.py --arg1=1 --arg2=2' \
+    --dry-run
+```
