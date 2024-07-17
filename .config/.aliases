@@ -1,0 +1,19 @@
+alias pstat='pueue status'
+alias wg='watch -n 0.1 --color "gpustat --color"'
+alias pf='pueue follow'
+alias pk='pueue kill'
+alias pl='pueue log'
+alias pclean='pueue clean'
+alias premove='pueue remove'
+alias k='kubectl'
+alias r='runai'
+
+alias pueuekillall='pueue kill {0..999}'
+alias pueueremoveall='pueue remove {0..999}'
+
+
+alias rl='runai logs'
+alias rll='runai list'
+alias rd='runai describe job'
+alias h='history'
+alias hg='history | grep'
