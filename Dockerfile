@@ -53,10 +53,10 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
-# Build arguments
-ARG LDAP_USERNAME=ndimitri
+# Build arguments (change them to your case)
+ARG LDAP_USERNAME=...  
 ARG LDAP_GROUPNAME=lts4
-ARG LDAP_UID=229754
+ARG LDAP_UID=...
 ARG LDAP_GID=10426
 
 # Create local user and group
@@ -72,11 +72,17 @@ RUN groupadd $LDAP_GROUPNAME -g $LDAP_GID && \
 # Install Visual Studio Code Server
 RUN curl -fsSL https://code-server.dev/install.sh | sh
 
-# Install VS Code and extensions
+# Install VS Code and some useful extensions
 RUN code-server --install-extension ms-python.python 
 
 RUN code --install-extension ms-python.black-formatter --no-sandbox --user-data-dir /usr/bin --force
 RUN code --install-extension gruntfuggly.todo-tree --no-sandbox --user-data-dir /usr/bin --force
+RUN code --install-extension ms-python.debugpy --no-sandbox --user-data-dir /usr/bin --force
+RUN code --install-extension ms-toolsai.jupyter --no-sandbox --user-data-dir /usr/bin --force
+RUN code --install-extension GitHub.copilot --no-sandbox --user-data-dir /usr/bin --force
+RUN code --install-extension mhutchie.git-graph --no-sandbox --user-data-dir /usr/bin --force
+RUN code --install-extension eamodio.gitlens --no-sandbox --user-data-dir /usr/bin --force
+
 
 # install rust and pueue
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
