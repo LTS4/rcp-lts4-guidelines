@@ -14,7 +14,7 @@ VERSION=v1
 # Do not change the following lines
 CONTAINER=$REGISTRY/$LDAP_GROUPNAME-$LDAP_USERNAME/$IMG_NAME
 
-docker build -t $CONTAINER .\
+docker build -t $CONTAINER . \
 --build-arg LDAP_GID=$LDAP_GID \
 --build-arg LDAP_UID=$LDAP_UID \
 --build-arg LDAP_USERNAME=$USERNAME \
