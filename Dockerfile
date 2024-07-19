@@ -1,3 +1,10 @@
+# Build arguments (change them to your case)
+ARG LDAP_USERNAME=...  
+ARG LDAP_GROUPNAME=lts4
+ARG LDAP_UID=...
+ARG LDAP_GID=10426
+
+# Base image
 FROM pytorch/pytorch:2.3.1-cuda11.8-cudnn8-runtime
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -53,11 +60,7 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
-# Build arguments (change them to your case)
-ARG LDAP_USERNAME=...  
-ARG LDAP_GROUPNAME=lts4
-ARG LDAP_UID=...
-ARG LDAP_GID=10426
+
 
 # Create local user and group
 RUN groupadd $LDAP_GROUPNAME -g $LDAP_GID && \
