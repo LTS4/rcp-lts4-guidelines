@@ -1,5 +1,5 @@
 # Build arguments (change them to your case)
-ARG LDAP_USERNAME=...  
+ARG LDAP_USERNAME=...
 ARG LDAP_GROUPNAME=lts4
 ARG LDAP_UID=...
 ARG LDAP_GID=10426
@@ -56,35 +56,27 @@ RUN echo "Etc/UTC" > /etc/timezone && \
 
 
 RUN locale-gen en_US.UTF-8
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US:en
-ENV LC_ALL en_US.UTF-8
-
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV LC_ALL=en_US.UTF-8
 
 
 # Create local user and group
-RUN groupadd $LDAP_GROUPNAME -g $LDAP_GID && \
-    useradd -m -s /bin/bash -N -u $LDAP_UID -g $LDAP_GID $LDAP_USERNAME && \
+RUN groupadd ${LDAP_GROUPNAME} -g ${LDAP_GID} && \
+    useradd -m -s /bin/bash -N -u ${LDAP_UID} -g ${LDAP_GID} ${LDAP_USERNAME} && \
     echo "${LDAP_USERNAME}:${LDAP_USERNAME}" | chpasswd && \
     usermod -aG sudo,adm,root ${LDAP_USERNAME} && \
     chown -R ${LDAP_USERNAME}:${LDAP_GROUPNAME} ${HOME} && \
     echo "${LDAP_USERNAME}   ALL = NOPASSWD: ALL" > /etc/sudoers
 
 
-
-# Install Visual Studio Code Server
+# Install Visual Studio Code Server and some useful extensions
 RUN curl -fsSL https://code-server.dev/install.sh | sh
-
-# Install VS Code and some useful extensions
 RUN code-server --install-extension ms-python.python 
-
-RUN code --install-extension ms-python.black-formatter --no-sandbox --user-data-dir /usr/bin --force
-RUN code --install-extension gruntfuggly.todo-tree --no-sandbox --user-data-dir /usr/bin --force
-RUN code --install-extension ms-python.debugpy --no-sandbox --user-data-dir /usr/bin --force
-RUN code --install-extension ms-toolsai.jupyter --no-sandbox --user-data-dir /usr/bin --force
-RUN code --install-extension GitHub.copilot --no-sandbox --user-data-dir /usr/bin --force
-RUN code --install-extension mhutchie.git-graph --no-sandbox --user-data-dir /usr/bin --force
-RUN code --install-extension eamodio.gitlens --no-sandbox --user-data-dir /usr/bin --force
+RUN code-server --install-extension ms-python.black-formatter --no-sandbox --user-data-dir /usr/bin --force
+RUN code-server --install-extension gruntfuggly.todo-tree --no-sandbox --user-data-dir /usr/bin --force
+RUN code-server --install-extension ms-python.debugpy --no-sandbox --user-data-dir /usr/bin --force
+RUN code-server --install-extension ms-toolsai.jupyter --no-sandbox --user-data-dir /usr/bin --force
 
 
 # install rust and pueue
