@@ -1,11 +1,11 @@
-# Build arguments (change them to your case)
-ARG LDAP_USERNAME=...
-ARG LDAP_GROUPNAME=lts4
-ARG LDAP_UID=...
-ARG LDAP_GID=10426
-
 # Base image
 FROM pytorch/pytorch:2.3.1-cuda11.8-cudnn8-runtime
+
+# Build arguments (change them to your case)
+ENV LDAP_USERNAME=...
+ENV LDAP_GROUPNAME=lts4
+ENV LDAP_UID=...
+ENV LDAP_GID=10426
 
 ENV DEBIAN_FRONTEND=noninteractive
 
