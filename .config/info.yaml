@@ -1,6 +1,6 @@
-user: ndimitri
-uid: 229754
+user: # YOUR LDAP GOES HERE
+uid: # YOUR UID GOES HERE
 gid: 10426
-pvc: runai-lts4-ndimitri-scratch
-image: registry.rcp.epfl.ch/lts4-ndimitri/example:latest
+pvc: # YOUR PVC GOES HERE -> runai-lts4-${ADD YOUR LDAP HERE}-scratch
+image: # YOUR TEMPLATE IMAGE GOES HERE -> registry.rcp.epfl.ch/lts4-${ADD YOUR LDAP HERE}/example:latest
 mount_path: /mnt/lts4/scratch
