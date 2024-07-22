@@ -24,37 +24,20 @@ Now you can proceed with the next steps, building your docker image, pushing it 
 
 ## Building your docker image
 
-The base image uses a specific pytorch image for reproducibility, adds several libraries, adds the current user 
+The base image uses a specific pytorch image for reproducibility, adds several libraries, adds the current user.
 
 First step is to get your credential, get LDAP details and paste them below.
 ```bash
-USERNAME=ndimitri
+# Replace with your GASPAR username
+LDAP_USERNAME=ndimitri
 
-ldapsearch -x -b o=epfl,c=ch -H ldaps://ldap.epfl.ch -LLL "(&(objectclass=person)(uid=$USERNAME))" uid uidNumber gidNumber
+ldapsearch -x -b o=epfl,c=ch -H ldaps://ldap.epfl.ch -LLL "(&(objectclass=person)(uid=$LDAP_USERNAME))" uid uidNumber gidNumber
 ```
 
-Copy them to the appropriate fields below.
+Copy them to the appropriate fields in `publish.sh` and `Dockerfile`. Then, run the following line to push your image to the registry (if you only want to build the image without pushing it to the registry, omit the `push`).
+
 ```bash
-LDAP_USERNAME=...
-LDAP_GROUPNAME=lts4
-LDAP_UID=...
-LDAP_GID=...
-
-REGISTRY=registry.rcp.epfl.ch
-IMG_NAME=base
-VERSION=v1
-
-CONTAINER=$REGISTRY/$LDAP_GROUPNAME-$LDAP_USERNAME/$IMG_NAME
-
-docker build -t $CONTAINER . \
---build-arg LDAP_GID=$LDAP_GID \
---build-arg LDAP_UID=$LDAP_UID \
---build-arg LDAP_USERNAME=$USERNAME \
---build-arg LDAP_GROUPNAME=$LDAP_GROUPNAME
-
-docker tag $CONTAINER $CONTAINER:$VERSION
-docker tag $CONTAINER $CONTAINER:latest
-docker push $CONTAINER --all-tags
+./publish.sh push
 ```
 
 
@@ -64,7 +47,7 @@ More detailed information coming soon, take a look at the `launch.py` script for
 
 First, you need to change the details on `.config/info.yaml` to match your credentials. The `launch.py` script will use this file to get the necessary information.
 
-Interactive job
+### Interactive job
 ```bash
 python launch.py \
     --interactive \
@@ -75,7 +58,7 @@ python launch.py \
     --image=CONTAINER_NAME:VERSION 
 ```
 
-Training job
+### Training job
 ```bash
 python launch.py \
     --name=NAME_OF_JOB \
@@ -86,7 +69,7 @@ python launch.py \
     --command='cd path/to/code && python train.py --arg1=1 --arg2=2'
 ```
 
-Do not launch but only print out the yaml config file
+### Do not launch but only print out the yaml config file
 ```bash
 python launch.py \
     --name=NAME_OF_JOB \

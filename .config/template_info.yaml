@@ -1,6 +1,0 @@
-user: ndimitri
-uid: 229754
-gid: 10426
-pvc: runai-lts4-ndimitri-scratch
-image: registry.rcp.epfl.ch/lts4-ndimitri/example:latest
-mount_path: /mnt/lts4/scratch
