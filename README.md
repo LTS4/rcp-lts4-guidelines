@@ -6,7 +6,7 @@ This guide builds upon https://github.com/epfml/getting-started.
 
 [This guide](https://wiki.rcp.epfl.ch/home/CaaS/Quick_Start) is a good starting point for the requirements.
 
-1. Install docker and sudoless docker
+1. Install docker and sudoless docker. Follow this link: https://wiki.rcp.epfl.ch/en/home/CaaS/FAQ/how-to-build-a-container
 2. Install kubernetes
    1. follow the instructions in the [wiki.rcp.epfl.ch](https://wiki.rcp.epfl.ch)
 3. Install runai using the instructions in the wiki
@@ -15,8 +15,9 @@ This guide builds upon https://github.com/epfml/getting-started.
    1. go to registry.rcp.epfl.ch and login
    2. create your project with the UI. Your project should be `lts4-$USERNAME` 
    3. login with docker to the registry by `docker login registry.rcp.epfl.ch`
-5. Create a wandb secret and name it `wandb-secret`. This is needed for the wandb integration.
-6. `haas` 
+5. Create a wandb secret and name it `wandb-secret`. This is needed for the wandb integration. Follow this link: https://wiki.rcp.epfl.ch/home/CaaS/FAQ/how-to-use-secret
+6. For Visual Studio Code integration, follow this link: https://wiki.rcp.epfl.ch/en/home/CaaS/FAQ/how-to-vscode
+7. `haas` 
    1. Make sure you have access to the `haas` storage by running `ssh $USERNAME@haas001.rcp.epfl.ch`
    2. go to your mounted volume (should be `/mnt/lts4/scratch` for most) and create a directory with your name via `mkdir -p /mnt/lts4/scratch/home/$USERNAME`. The launch script assumes that you have done so. 
 
