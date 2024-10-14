@@ -46,17 +46,45 @@ Copy them to the appropriate fields in `publish.sh` and `Dockerfile`. Then, run 
 
 More detailed information coming soon, take a look at the `launch.py` script for now.
 
-First, you need to change the details on `.config/info.yaml` to match your credentials. The `launch.py` script will use this file to get the necessary information.
+First, you need to specify your personal information, such as UID, GID etc. The `launch.py` script will use this file to get the necessary information. We do this by setting persistent environment variables in the `~/.profile` file. Then this file is sourced by `~/.bashrc` and the variables are available in the shell.  
+
+```bash
+echo 'export EPFL_UID=229754' >> ~/.profile 
+echo 'export EPFL_GID=10426' >> ~/.profile 
+echo 'export EPFL_SUPPLEMENTAL_GROUPS=78680' >> ~/.profile 
+echo 'export EPFL_USER=ndimitri' >> ~/.profile 
+
+# make the variables available in the shell
+# ...for bash
+echo 'source ~/.profile' >> ~/.bashrc
+source ~/.bashrc
+
+# ...for zsh
+echo 'source ~/.profile' >> ~/.zshrc
+source ~/.zshrc
+```
+
+### (Optional) Make the launch script available in your path
+To use the launch script from anywhere, you can add an alias to your `.bashrc` or `.zshrc` file.
+```bash
+# Add the following line to your .bashrc or .zshrc
+# ...for bash
+echo 'alias rcplaunch="python /path/to/launch.py"' >> ~/.bashrc
+source ~/.bashrc
+
+# ...for zsh
+echo 'alias rcplaunch="python /path/to/launch.py"' >> ~/.zshrc
+source ~/.zshrc
+```
+
 
 ### Interactive job
 ```bash
 python launch.py \
-    --interactive \
     --name=NAME_OF_JOB \
-    --shm=10 \
     --gpus=1 \
-    --cpus=20 \
-    --image=CONTAINER_NAME:VERSION 
+    --image=CONTAINER_NAME:VERSION \
+    --interactive 
 ```
 
 ### Training job
