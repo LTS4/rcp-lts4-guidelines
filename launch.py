@@ -24,19 +24,23 @@ def main(args):
     gid = os.getenv("EPFL_GID")
     supplementary_groups = os.getenv("EPFL_SUPPLEMENTAL_GROUPS")
     user = os.getenv("EPFL_USER")
+    assert user is not None, "EPFL_USER must be set"
     assert uid is not None, "EPFL_UID must be set"
     assert gid is not None, "EPFL_GID must be set"
-    assert supplementary_groups is not None, "EPFL_SUPPLEMENTAL_GROUPS must be set"
-    assert user is not None, "EPFL_USER must be set"
+    if not args.student:
+        assert supplementary_groups is not None, "EPFL_SUPPLEMENTAL_GROUPS must be set"
     args.uid = int(uid)
     args.gid = int(gid)
-    args.supplemental_groups = int(supplementary_groups)
     args.user = user
+    if supplementary_groups is not None:
+        args.supplemental_groups = int(supplementary_groups)
 
     if args.student:
         args.virtual_home = "/mnt/lts4/scratch/students"
+        args.supplemental_groups = ""
     else:
         args.virtual_home = "/mnt/lts4/scratch/home"
+        args.supplemental_groups = f"--supplemental-groups {args.supplemental_groups} \\"
 
     if args.gpus == int(args.gpus):
         args.gpus = int(args.gpus)
@@ -58,10 +62,9 @@ def main(args):
         args.cpus = f"--cpu {args.cpus} \\"
 
     config = config_template.format(**vars(args))
-    print(config)
-    if args.dry:
-        print(colored(config, "black", force_color=True))
-    else:
+    config = "".join([s for s in config.strip().splitlines(True) if s.strip("\r\n").strip()]) + "\n"
+    print(colored(config, "black", force_color=True))
+    if not args.dry:
         config_args = shlex.split(config)
         result = subprocess.run(config_args, capture_output=True)
         print(result.stdout.decode("utf-8"))
@@ -82,7 +85,7 @@ runai submit \\
   -e WANDB_API_KEY=SECRET:wandb-secret,secret \\
   --run-as-uid {uid} \\
   --run-as-gid {gid} \\
-  --supplemental-groups {supplemental_groups} \\
+  {supplemental_groups}
   --existing-pvc claimname=lts4-scratch,path=/mnt/lts4/scratch \\
   {command}
 """
