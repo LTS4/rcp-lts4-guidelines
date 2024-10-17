@@ -74,6 +74,8 @@ RUN echo "Etc/UTC" > /etc/timezone && \
         htop \
      && rm -rf /var/lib/apt/lists/*
 
+RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash
+RUN apt-get install -y git-lfs
 
 RUN locale-gen en_US.UTF-8
 ENV LANG=en_US.UTF-8

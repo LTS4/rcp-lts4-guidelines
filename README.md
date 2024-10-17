@@ -44,7 +44,7 @@ Copy them to the appropriate fields in `publish.sh` and `Dockerfile`. Then, run 
 # Before running this command, make sure you have modified 
 # the LDAP variables in the publish.sh script
 ./publish.sh --path=dockerfiles/base \
-   --image=NAME_OF_YOUR_IMAGE \
+   --img=NAME_OF_YOUR_IMAGE \
    --version=1 \
    --push=True
 ```
