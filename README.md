@@ -27,6 +27,9 @@ Now you can proceed with the next steps, building your docker image, pushing it 
 
 The base image uses a specific pytorch image for reproducibility, adds several libraries, adds the current user.
 
+If you want to add more template images, create a directory in the `dockerfiles` directory and add a `Dockerfile` there. 
+Then, make a PR.
+
 First step is to get your credential, get LDAP details and paste them below.
 ```bash
 # Replace with your GASPAR username
@@ -38,7 +41,12 @@ ldapsearch -x -b o=epfl,c=ch -H ldaps://ldap.epfl.ch -LLL "(&(objectclass=person
 Copy them to the appropriate fields in `publish.sh` and `Dockerfile`. Then, run the following line to push your image to the registry (if you only want to build the image without pushing it to the registry, omit the `push`).
 
 ```bash
-./publish.sh push
+# Before running this command, make sure you have modified 
+# the LDAP variables in the publish.sh script
+./publish.sh --path=dockerfiles/base \
+   --image=NAME_OF_YOUR_IMAGE \
+   --version=1 \
+   --push=True
 ```
 
 
@@ -80,9 +88,10 @@ source ~/.zshrc
 
 ### Interactive job
 ```bash
+# You can specify a fraction of the GPU to use with the `--gpus` flag
 python launch.py \
     --name=NAME_OF_JOB \
-    --gpus=1 \
+    --gpus=0.8 \
     --image=CONTAINER_NAME:VERSION \
     --interactive 
 ```
