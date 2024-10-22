@@ -1,9 +1,9 @@
 import argparse
 import os
+import shlex
 import subprocess
 
 from termcolor import colored
-import shlex
 
 parser = argparse.ArgumentParser(description="Launch a job on Run:AI")
 
@@ -63,7 +63,7 @@ def main(args):
 
     config = config_template.format(**vars(args))
     config = "".join([s for s in config.strip().splitlines(True) if s.strip("\r\n").strip()]) + "\n"
-    print(colored(config, "black", force_color=True))
+    print(colored(config, "grey", force_color=True))
     if not args.dry:
         config_args = shlex.split(config)
         result = subprocess.run(config_args, capture_output=True)
