@@ -17,6 +17,9 @@ parser.add_argument("--mem", type=int, help="RAM memory size (in GB)", default=1
 parser.add_argument("--noshm", action="store_true", help="Do not use shared memory")
 parser.add_argument("--student", action="store_true", help="Use student paths")
 parser.add_argument("--dry", action="store_true", help="Dry run")
+parser.add_argument(
+    "--node-pool", type=str, help="Node pool to use", default="v100", choices=["default", "v100", "a100"]
+)
 
 
 def main(args):
@@ -46,7 +49,7 @@ def main(args):
         args.gpus = int(args.gpus)
 
     if args.interactive:
-        args.command = "--interactive --command -- sleep infinity"
+        args.command = "--interactive  -- sleep infinity"
     else:
         assert args.command is not None, "Command must be provided for non-interactive jobs"
         args.command = "cd $VIRTUAL_HOME && " + args.command
@@ -83,6 +86,7 @@ runai submit \\
   -e VIRTUAL_HOME={virtual_home}/{user} \\
   -e DATA_DIR=/mnt/lts4/scratch/data \\
   -e WANDB_API_KEY=SECRET:wandb-secret,secret \\
+  --node-pool {node_pool} \\
   --run-as-uid {uid} \\
   --run-as-gid {gid} \\
   {supplemental_groups}
@@ -101,7 +105,7 @@ useful_commands = """The following commands may come in handy:
 if __name__ == "__main__":
     args = parser.parse_args()
     result = subprocess.run(["runai", "list"], capture_output=True)
-    if any([r.startswith(args.name) for r in result.stdout.decode("utf-8").split("\n")]):
+    if any([r.split()[0] == args.name for r in result.stdout.decode("utf-8").split("\n") if len(r) > 0]):
         print(colored(f"Job {args.name} already exists. Delete it first or change the name.", "red"))
         exit(1)
     assert (
