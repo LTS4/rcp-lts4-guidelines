@@ -86,6 +86,7 @@ runai submit \\
   -e VIRTUAL_HOME={virtual_home}/{user} \\
   -e DATA_DIR=/mnt/lts4/scratch/data \\
   -e WANDB_API_KEY=SECRET:wandb-secret,secret \\
+  -e HOME=/home/{user} \\
   --node-pool {node_pool} \\
   --run-as-uid {uid} \\
   --run-as-gid {gid} \\
