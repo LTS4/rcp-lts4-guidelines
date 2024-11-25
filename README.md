@@ -6,7 +6,7 @@ This guide builds upon https://github.com/epfml/getting-started.
 
 [This guide](https://wiki.rcp.epfl.ch/home/CaaS/Quick_Start) is a good starting point for the requirements.
 
-1. Install docker and sudoless docker. Follow this link: https://wiki.rcp.epfl.ch/en/home/CaaS/FAQ/how-to-build-a-container
+1. Install docker and sudoless docker. [More info on rcp doc](https://wiki.rcp.epfl.ch/home/CaaS/FAQ/how-to-build-a-container-part1)
 2. Install kubernetes
    1. follow the instructions in the [wiki.rcp.epfl.ch](https://wiki.rcp.epfl.ch)
 3. Install runai using the instructions in the wiki
