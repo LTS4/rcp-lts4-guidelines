@@ -23,6 +23,15 @@ This guide builds upon https://github.com/epfml/getting-started.
 
 Now you can proceed with the next steps, building your docker image, pushing it to the registry and launching jobs.
 
+## Recover LDAP accreditation
+
+First, you must recover and save your LDAP accreditation codes. You can use the `ldap_fetch.sh` script as follows, where `GASPAR` is your EPFL username:
+```bash
+./ldap_fetch.sh GASPAR
+```
+
+This will store your credentials in the `~/.profile` file, and make them available at startup by sourcing them it to your `.bashrc` or `.zshrc` files.
+
 ## Building your docker image
 
 The base image uses a specific pytorch image for reproducibility, adds several libraries, adds the current user.
@@ -46,24 +55,6 @@ Then, run the following line to push your image to the registry (if you only wan
 ## Launching a job
 
 More detailed information coming soon, take a look at the `launch.py` script for now.
-
-First, you need to specify your personal information, such as UID, GID etc. The `launch.py` script will use this file to get the necessary information. We do this by setting persistent environment variables in the `~/.profile` file. Then this file is sourced by `~/.bashrc` and the variables are available in the shell.
-
-```bash
-echo 'export EPFL_UID=229754' >> ~/.profile
-echo 'export EPFL_GID=10426' >> ~/.profile
-echo 'export EPFL_SUPPLEMENTAL_GROUPS=78680' >> ~/.profile
-echo 'export EPFL_USER=ndimitri' >> ~/.profile
-
-# make the variables available in the shell
-# ...for bash
-echo 'source ~/.profile' >> ~/.bashrc
-source ~/.bashrc
-
-# ...for zsh
-echo 'source ~/.profile' >> ~/.zshrc
-source ~/.zshrc
-```
 
 ### (Optional) Make the launch script available in your path
 To use the launch script from anywhere, you can add an alias to your `.bashrc` or `.zshrc` file.

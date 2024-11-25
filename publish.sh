@@ -7,9 +7,6 @@ set -e  # exit on error
 
 while [ $# -gt 0 ]; do
   case "$1" in
-    --user=*|-u=*)
-      LDAP_USERNAME="${1#*=}"
-      ;;
     --path=*|-p=*)
       path="${1#*=}"
       ;;
@@ -39,27 +36,18 @@ version=${version:=v1}
 echo "Building docker image from path:  $path"
 echo "Pushing image to registry:        $push"
 
-# Recover UID and GID from ldaps://ldap.epfl.ch
-
-ldap_return=$( ldapsearch -x -b o=epfl,c=ch -H ldaps://ldap.epfl.ch \
-    -LLL "(&(objectclass=person)(uid=$LDAP_USERNAME))" uid uidNumber gidNumber )
-
-
-LDAP_GROUPNAME=lts4
-LDAP_UID=$( perl -ne 'print /uidNumber: (.*)/' <<< "$ldap_return" )
-LDAP_GID=$( perl -ne 'print /gidNumber: (.*)/' <<< "$ldap_return" )
 REGISTRY=registry.rcp.epfl.ch
 VERSION_NUMBER=$version
 
 # Do not change the following lines
-CONTAINER=$REGISTRY/$LDAP_GROUPNAME-$LDAP_USERNAME/$IMG_NAME
+CONTAINER=$REGISTRY/$EPFL_GROUPNAME-$EPFL_USER/$IMG_NAME
 
 docker build -t $CONTAINER $path \
 --platform linux/amd64 \
---build-arg LDAP_GID=$LDAP_GID \
---build-arg LDAP_UID=$LDAP_UID \
---build-arg LDAP_USERNAME=$LDAP_USERNAME \
---build-arg LDAP_GROUPNAME=$LDAP_GROUPNAME
+--build-arg LDAP_GID=$EPFL_GID \
+--build-arg LDAP_UID=$EPFL_UID \
+--build-arg LDAP_USERNAME=$EPFL_USER \
+--build-arg LDAP_GROUPNAME=$EPFL_GROUPNAME
 
 docker tag $CONTAINER $CONTAINER:$VERSION_NUMBER
 docker tag $CONTAINER $CONTAINER:latest
