@@ -74,9 +74,9 @@ source ~/.zshrc
 ```bash
 # You can specify a fraction of the GPU to use with the `--gpus` flag
 python launch.py \
-    --name=NAME_OF_JOB \
+    --name=<name-job> \
     --gpus=0.8 \
-    --image=CONTAINER_NAME:VERSION \
+    --image=registry.rcp.epfl.ch/lts4-$GASPAR/<name-image> \
     --interactive
 ```
 
@@ -84,10 +84,9 @@ python launch.py \
 ```bash
 python launch.py \
     --name=NAME_OF_JOB \
-    --shm=10 \
     --gpus=1 \
     --cpus=20 \
-    --image=CONTAINER_NAME:VERSION \
+    --image=registry.rcp.epfl.ch/lts4-$GASPAR/<name-image> \
     --command='cd path/to/code && python train.py --arg1=1 --arg2=2'
 ```
 
@@ -95,10 +94,9 @@ python launch.py \
 ```bash
 python launch.py \
     --name=NAME_OF_JOB \
-    --shm=10 \
     --gpus=1 \
     --cpus=20 \
-    --image=CONTAINER_NAME:VERSION \
+    --image=registry.rcp.epfl.ch/lts4-$GASPAR/<name-image> \
     --command='cd path/to/code && python train.py --arg1=1 --arg2=2' \
     --dry-run
 ```
