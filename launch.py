@@ -18,7 +18,7 @@ parser.add_argument("--noshm", action="store_true", help="Do not use shared memo
 parser.add_argument("--student", action="store_true", help="Use student paths")
 parser.add_argument("--dry", action="store_true", help="Dry run")
 parser.add_argument(
-    "--node-pool", type=str, help="Node pool to use", default="v100", choices=["default", "v100", "a100"]
+    "--node-pool", type=str, help="Node pool to use", default="v100", choices=["default", "v100", "h100"]
 )
 
 
