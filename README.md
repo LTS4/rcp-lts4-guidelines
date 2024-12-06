@@ -69,6 +69,7 @@ echo 'alias rcplaunch="python /path/to/launch.py"' >> ~/.zshrc
 source ~/.zshrc
 ```
 
+> **Remark:** If you're not a permanent member of LTS4 (PhD or Postdoc), include the flag `--student` in the command lines below.
 
 ### Interactive job
 ```bash
