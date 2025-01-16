@@ -9,10 +9,10 @@ FROM nvcr.io/nvidia/pytorch:24.01-py3
 LABEL maintainer="Nikolaos Dimitriadis <dimitriadisnikolaos0@gmail.com>"
 
 # Build arguments (change them to your case)
-ARG LDAP_USERNAME=ndimitri
+ARG LDAP_USERNAME
 ARG LDAP_GROUPNAME=lts4
-ARG LDAP_UID=229754
-ARG LDAP_GID=10426
+ARG LDAP_UID
+ARG LDAP_GID
 
 ENV LDAP_USERNAME=${LDAP_USERNAME}
 ENV LDAP_GROUPNAME=${LDAP_GROUPNAME}
@@ -96,8 +96,8 @@ RUN groupadd ${LDAP_GROUPNAME} -g ${LDAP_GID} && \
 # install rust and pueue
 RUN curl https://sh.rustup.rs -sSf | bash -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
-RUN echo 'source $HOME/.cargo/env' >> $HOME/.bashrc 
-RUN cargo install pueue --locked 
+RUN echo 'source $HOME/.cargo/env' >> $HOME/.bashrc
+RUN cargo install pueue --locked
 
 
 # install everything else with pip

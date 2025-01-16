@@ -18,32 +18,28 @@ parser.add_argument("--noshm", action="store_true", help="Do not use shared memo
 parser.add_argument("--student", action="store_true", help="Use student paths")
 parser.add_argument("--dry", action="store_true", help="Dry run")
 parser.add_argument(
-    "--node-pool", type=str, help="Node pool to use", default="v100", choices=["default", "v100", "a100"]
+    "--node-pool", type=str, help="Node pool to use", default="v100", choices=["default", "v100", "h100"]
 )
 
 
 def main(args):
     uid = os.getenv("EPFL_UID")
     gid = os.getenv("EPFL_GID")
-    supplementary_groups = os.getenv("EPFL_SUPPLEMENTAL_GROUPS")
+    supplemental_groups = os.getenv("EPFL_SUPPLEMENTAL_GROUPS")
     user = os.getenv("EPFL_USER")
     assert user is not None, "EPFL_USER must be set"
     assert uid is not None, "EPFL_UID must be set"
     assert gid is not None, "EPFL_GID must be set"
-    if not args.student:
-        assert supplementary_groups is not None, "EPFL_SUPPLEMENTAL_GROUPS must be set"
     args.uid = int(uid)
     args.gid = int(gid)
     args.user = user
-    if supplementary_groups is not None:
-        args.supplemental_groups = int(supplementary_groups)
+    args.supplemental_groups = supplemental_groups
 
     if args.student:
         args.virtual_home = "/mnt/lts4/scratch/students"
-        args.supplemental_groups = ""
     else:
         args.virtual_home = "/mnt/lts4/scratch/home"
-        args.supplemental_groups = f"--supplemental-groups {args.supplemental_groups} \\"
+    
 
     if args.gpus == int(args.gpus):
         args.gpus = int(args.gpus)
@@ -90,7 +86,7 @@ runai submit \\
   --node-pool {node_pool} \\
   --run-as-uid {uid} \\
   --run-as-gid {gid} \\
-  {supplemental_groups}
+  --supplemental-groups {supplemental_groups} \\
   --existing-pvc claimname=lts4-scratch,path=/mnt/lts4/scratch \\
   {command}
 """
