@@ -6,9 +6,10 @@ This guide builds upon https://github.com/epfml/getting-started.
 
 [This guide](https://wiki.rcp.epfl.ch/home/CaaS/Quick_Start) is a good starting point for the requirements.
 
-1. Install docker and sudoless docker. [More info on rcp doc](https://wiki.rcp.epfl.ch/home/CaaS/FAQ/how-to-build-a-container-part1)
+1. Install docker and sudoless docker. More info on rcp [doc on containers](https://wiki.rcp.epfl.ch/home/CaaS/FAQ/how-to-build-a-container-part1) and [doc on preparing environments](https://wiki.rcp.epfl.ch/home/CaaS/FAQ/how-to-prepare-environment)
 2. Install kubernetes
-   1. follow the instructions in the [wiki.rcp.epfl.ch](https://wiki.rcp.epfl.ch)
+   1. follow the kubernetes instructions in the [wiki.rcp.epfl.ch](https://wiki.rcp.epfl.ch/home/CaaS/FAQ/how-to-prepare-environment) to install kubernetes
+   2. if running `kubectl version` gives a `The connection to the server localhost:8080 was refused...` message, you might need to create a `.kube/config` file and run `curl https://wiki.rcp.epfl.ch/public/files/kube-config.yaml -o ~/.kube/config && chmod 600 ~/.kube/config` to configure the cluster
 3. Install runai using the instructions in the wiki
    1. login to the RunAI platform using `runai login`. You should be able to run `runai whoami` afterwards
 4. `registry.rcp.epfl.ch`
