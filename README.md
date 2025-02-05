@@ -19,7 +19,7 @@ This guide builds upon https://github.com/epfml/getting-started.
 5. Create a wandb secret and name it `wandb-secret`. This is needed for the wandb integration. Follow this link: https://wiki.rcp.epfl.ch/home/CaaS/FAQ/how-to-use-secret
 6. For Visual Studio Code integration, follow this link: https://wiki.rcp.epfl.ch/en/home/CaaS/FAQ/how-to-vscode
 7. `haas`
-   1. Make sure you have access to the `haas` storage by running `ssh $USERNAME@haas001.rcp.epfl.ch`
+   1. Make sure you have access to the `haas` storage by running `ssh $USERNAME@haas001.rcp.epfl.ch` (or `ssh $USERNAME@jumphost.rcp.epfl.ch`, which is the recommended host)
    2. go to your mounted volume (should be `/mnt/lts4/scratch` for most) and create a directory with your name via `mkdir -p /mnt/lts4/scratch/home/$USERNAME`. The launch script assumes that you have done so.
 
 Now you can proceed with the next steps, building your docker image, pushing it to the registry and launching jobs.
