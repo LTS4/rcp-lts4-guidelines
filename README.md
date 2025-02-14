@@ -102,3 +102,7 @@ python launch.py \
     --command='cd path/to/code && python train.py --arg1=1 --arg2=2' \
     --dry-run
 ```
+
+### Checking the status of a job
+
+The status of a job can be checked with the command `runai logs job-name`. If a run fails, runai will launch it again up to 6 times in pods with the name `job-name-0-n`. To check the logs of a specific run, you can run `runai logs job-name --pod job-name-0-n`, where `n` is the number of the pod you want to access.
