@@ -78,7 +78,7 @@ source ~/.zshrc
 python launch.py \
     --name=<name-job> \
     --gpus=0.8 \
-    --image=registry.rcp.epfl.ch/lts4-$GASPAR/<name-image> \
+    --image=registry.rcp.epfl.ch/lts4-$EPFL_USER/<name-image> \
     --interactive
 ```
 
@@ -88,7 +88,7 @@ python launch.py \
     --name=NAME_OF_JOB \
     --gpus=1 \
     --cpus=20 \
-    --image=registry.rcp.epfl.ch/lts4-$GASPAR/<name-image> \
+    --image=registry.rcp.epfl.ch/lts4-$EPFL_USER/<name-image> \
     --command='cd path/to/code && python train.py --arg1=1 --arg2=2'
 ```
 
@@ -98,7 +98,7 @@ python launch.py \
     --name=NAME_OF_JOB \
     --gpus=1 \
     --cpus=20 \
-    --image=registry.rcp.epfl.ch/lts4-$GASPAR/<name-image> \
+    --image=registry.rcp.epfl.ch/lts4-$EPFL_USER/<name-image> \
     --command='cd path/to/code && python train.py --arg1=1 --arg2=2' \
     --dry-run
 ```
