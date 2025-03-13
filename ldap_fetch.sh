@@ -41,6 +41,15 @@ export EPFL_SUPPLEMENTAL_GROUPS=78680
     echo "Credentials stored in ~/.profile"
 fi
 
+grep "RUNAI_OPTIONS" ~/.profile -q || echo 'export RUNAI_OPTIONS=(
+    --run-as-uid $EPFL_UID
+    --run-as-gid $EPFL_GID
+    --supplemental-groups $EPFL_SUPPLEMENTAL_GROUPS
+    --existing-pvc claimname=lts4-scratch,path=/mnt/lts4/scratch
+    --environment HOME=/home/$EPFL_USER
+    --environment SCRATCH_HOME=/mnt/lts4/scratch/home/$EPFL_USER
+)' >> ~/.profile
+
 case $SHELL in
     "/bin/bash") dotfile="$HOME/.bashrc" ;;
     "/bin/zsh") dotfile="$HOME/.zshrc" ;;
