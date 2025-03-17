@@ -1,0 +1,10 @@
+black
+ipython
+isort
+jupyter
+matplotlib
+numpy
+pandas
+pylint
+seaborn
+scikit-learn

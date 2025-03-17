@@ -16,7 +16,7 @@ This guide builds upon https://github.com/epfml/getting-started.
    1. go to registry.rcp.epfl.ch and login
    2. create your project with the UI. Your project should be `lts4-$USERNAME`
    3. login with docker to the registry by `docker login registry.rcp.epfl.ch`
-5. Create a wandb secret and name it `wandb-secret`. This is needed for the wandb integration. Follow this link: https://wiki.rcp.epfl.ch/home/CaaS/FAQ/how-to-use-secret
+5. (Optional) Create a wandb secret and name it `wandb-secret`. This is needed for the wandb integration. Follow this link: https://wiki.rcp.epfl.ch/home/CaaS/FAQ/how-to-use-secret
 6. For Visual Studio Code integration, follow this link: https://wiki.rcp.epfl.ch/en/home/CaaS/FAQ/how-to-vscode
 7. `haas`
    1. Make sure you have access to the `haas` storage by running `ssh $USERNAME@haas001.rcp.epfl.ch` (or `ssh $USERNAME@jumphost.rcp.epfl.ch`, which is the recommended host)
@@ -32,6 +32,8 @@ First, you must recover and save your LDAP accreditation codes. You can use the 
 ```
 
 This will store your credentials in the `~/.profile` file, and make them available at startup by sourcing them it to your `.bashrc` or `.zshrc` files.
+
+It will also define the `RUNAI_OPTIONS` environment variable, which will allow you to launch jobs with `runai submit`.
 
 ## Building your docker image
 
@@ -55,9 +57,48 @@ Then, run the following line to push your image to the registry (if you only wan
 
 ## Launching a job
 
+### Using runAI CLI
+
+The official way to launch and interact with jobs is thought the [RunAI command line
+interface](https://docs.run.ai/latest/Researcher/cli-reference/Introduction/).
+In particular using `runai submit`, whose available options are documented [here](https://docs.run.ai/latest/Researcher/cli-reference/runai-submit/).
+
+You need to use the `$RUNAI_OPTIONS`, which is set in your `~/.profile` by the `ldap_fetch.sh` script.
+
+> **Remark:** If you're not a permanent member of LTS4 (PhD or Postdoc), verify that your `EPFL_SCRATCH_HOME` is correctly set:
+> ```bash
+> $ echo $EPFL_SCRATCH_HOME
+> > /mnt/lts4/scratch/students/<gaspar>
+> ```
+
+#### Interactive job
+```bash
+
+# You can specify a fraction of the GPU to use with the `--gpus` flag
+runai submit $RUNAI_OPTIONS \
+    --name <name-job> \
+    --image registry.rcp.epfl.ch/lts4-$EPFL_USER/<name-image> \
+    --gpus 0.8 \
+    --interactive -- sleep infinity
+```
+
+#### Training job
+
+Supposing that you want to launch the script `train.py` in the `scr` directory of your scratch home
+folder (stored on `haas`), with arguments `--arg1=1 --arg2=2` you can use the following command:
+```bash
+runai submit $RUNAI_OPTIONS \
+    --name <name-job> \
+    --gpus 1 \
+    --image registry.rcp.epfl.ch/lts4-$EPFL_USER/<name-image> \
+    --command -- /bin/bash -c 'cd $SCRATCH_HOME && python src/train.py --arg1=1 --arg2=2'
+```
+
+### Using the launch.py script
+
 More detailed information coming soon, take a look at the `launch.py` script for now.
 
-### (Optional) Make the launch script available in your path
+#### (Optional) Make the launch script available in your path
 To use the launch script from anywhere, you can add an alias to your `.bashrc` or `.zshrc` file.
 ```bash
 # Add the following line to your .bashrc or .zshrc
@@ -72,7 +113,7 @@ source ~/.zshrc
 
 > **Remark:** If you're not a permanent member of LTS4 (PhD or Postdoc), include the flag `--student` in the command lines below.
 
-### Interactive job
+#### Interactive job
 ```bash
 # You can specify a fraction of the GPU to use with the `--gpus` flag
 python launch.py \
@@ -82,7 +123,7 @@ python launch.py \
     --interactive
 ```
 
-### Training job
+#### Training job
 ```bash
 python launch.py \
     --name=NAME_OF_JOB \
@@ -92,7 +133,7 @@ python launch.py \
     --command='cd path/to/code && python train.py --arg1=1 --arg2=2'
 ```
 
-### Do not launch but only print out the yaml config file
+#### Do not launch but only print out the yaml config file
 ```bash
 python launch.py \
     --name=NAME_OF_JOB \
