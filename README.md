@@ -48,7 +48,6 @@ Then, run the following line to push your image to the registry (if you only wan
 # Before running this command, make sure to change $GASPAR to your epfl username, or declare it as
 # an environment variable
 ./publish.sh --path=dockerfiles/base \
-   --user=$GASPAR
    --img=NAME_OF_YOUR_IMAGE \
    --version=1 \
    --push=True
