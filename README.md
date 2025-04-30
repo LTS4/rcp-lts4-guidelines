@@ -1,7 +1,5 @@
 # Getting started with RCP
 
-This guide builds upon https://github.com/epfml/getting-started.
-
 ## Requirements
 
 [This guide](https://wiki.rcp.epfl.ch/home/CaaS/Quick_Start) is a good starting point for the requirements.
@@ -146,3 +144,7 @@ python launch.py \
 ### Checking the status of a job
 
 The status of a job can be checked with the command `runai logs job-name`. If a run fails, runai will launch it again up to 6 times in pods with the name `job-name-0-n`. To check the logs of a specific run, you can run `runai logs job-name --pod job-name-0-n`, where `n` is the number of the pod you want to access.
+
+## Credits
+
+This guide builds upon https://github.com/epfml/getting-started.
