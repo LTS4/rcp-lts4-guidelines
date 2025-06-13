@@ -14,7 +14,7 @@
    1. go to registry.rcp.epfl.ch and login
    2. create your project with the UI. Your project should be `lts4-$USERNAME`
    3. login with docker to the registry by `docker login registry.rcp.epfl.ch`
-5. (Optional) Create a wandb secret and name it `wandb-secret`. This is needed for the wandb integration. Follow this link: https://wiki.rcp.epfl.ch/home/CaaS/FAQ/how-to-use-secret
+5. (Optional) Create a wandb secret and name it `wandb-secret`. This is needed for the wandb integration. Follow this link: https://wiki.rcp.epfl.ch/en/home/CaaS/FAQ/how-to-use-secret-wandb
 6. For Visual Studio Code integration, follow this link: https://wiki.rcp.epfl.ch/en/home/CaaS/FAQ/how-to-vscode
 7. `haas`
    1. Make sure you have access to the `haas` storage by running `ssh $USERNAME@haas001.rcp.epfl.ch` (or `ssh $USERNAME@jumphost.rcp.epfl.ch`, which is the recommended host)
