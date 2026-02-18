@@ -55,7 +55,12 @@ grep "RUNAI_OPTIONS" ~/.profile -q || echo 'export RUNAI_OPTIONS=(
     --existing-pvc claimname=lts4-scratch,path=/mnt/lts4/scratch
     --environment HOME=/home/$EPFL_USER
     --environment SCRATCH_HOME=$EPFL_SCRATCH_HOME
+    --environment WANDB_API_KEY=SECRET:wandb-secret,secret
 )' >> ~/.profile
+
+if ! command -v kubectl >/dev/null 2>&1 || ! kubectl get secret wandb-secret >/dev/null 2>&1; then
+    echo "Warning: WANDB_API_KEY option was added to RUNAI_OPTIONS, but 'wandb-secret' is not available yet (or kubectl is not configured). Re-check requirements for more details on how to set up wandb-secret."
+fi
 
 case $SHELL in
     "/bin/bash") dotfile="$HOME/.bashrc" ;;
