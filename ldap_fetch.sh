@@ -1,14 +1,28 @@
 #!/bin/bash
 # Recover UID and GID from ldaps://ldap.epfl.ch
 
-if [[ $1 = "-h" || $1 = "--help" ]]; then
+ENABLE_WANDB=false
+LDAP_USERNAME=""
+
+if [[ "$1" = "-h" || "$1" = "--help" ]]; then
     echo "NAME
     ldap_fetch.sh Fetch credentials from ldaps://ldap.epfl.ch for GASPAR user
 
 SYNOPSIS
     ./ldap_fetch.sh GASPAR
+    ./ldap_fetch.sh GASPAR --wandb
 "
     exit 0
+fi
+
+if [ $# -eq 1 ]; then
+    LDAP_USERNAME="$1"
+elif [ $# -eq 2 ] && [[ "$2" = "--wandb" ]]; then
+    ENABLE_WANDB=true
+    LDAP_USERNAME="$1"
+else
+    echo "Usage: ./ldap_fetch.sh GASPAR [--wandb]"
+    exit 1
 fi
 
 if [[ -f ~/.profile ]] && grep "EPFL_USER" ~/.profile -q; then
@@ -16,12 +30,10 @@ if [[ -f ~/.profile ]] && grep "EPFL_USER" ~/.profile -q; then
 else
 
     # Require gaspar username
-    if [ -z "$1" ]; then
+    if [ -z "$LDAP_USERNAME" ]; then
         echo "GASPAR username required"
         exit 1
     fi
-
-    LDAP_USERNAME="$1"
 
     ldap_return=$( ldapsearch -x -b o=epfl,c=ch -H ldaps://ldap.epfl.ch \
         -LLL "(&(objectclass=person)(uid=$LDAP_USERNAME))" uid uidNumber gidNumber )
@@ -48,7 +60,10 @@ export EPFL_SCRATCH_HOME=$EPFL_SCRATCH_HOME
     echo "Credentials stored in ~/.profile"
 fi
 
-grep "RUNAI_OPTIONS" ~/.profile -q || echo 'export RUNAI_OPTIONS=(
+if grep "RUNAI_OPTIONS" ~/.profile -q; then
+    :
+else
+    echo 'export RUNAI_OPTIONS=(
     --run-as-uid $EPFL_UID
     --run-as-gid $EPFL_GID
     --supplemental-groups $EPFL_SUPPLEMENTAL_GROUPS
@@ -56,6 +71,15 @@ grep "RUNAI_OPTIONS" ~/.profile -q || echo 'export RUNAI_OPTIONS=(
     --environment HOME=/home/$EPFL_USER
     --environment SCRATCH_HOME=$EPFL_SCRATCH_HOME
 )' >> ~/.profile
+fi
+
+if $ENABLE_WANDB && ! grep "RUNAI_OPTIONS+=( --environment WANDB_API_KEY=SECRET:wandb-secret,secret )" ~/.profile -q; then
+    echo "RUNAI_OPTIONS+=( --environment WANDB_API_KEY=SECRET:wandb-secret,secret )" >> ~/.profile
+fi
+
+if $ENABLE_WANDB && (! command -v kubectl >/dev/null 2>&1 || ! kubectl get secret wandb-secret >/dev/null 2>&1); then
+    echo "Warning: '--wandb' was set but 'wandb-secret' is not available yet (or kubectl is not configured). Re-check requirements for how to set up wandb-secret."
+fi
 
 case $SHELL in
     "/bin/bash") dotfile="$HOME/.bashrc" ;;
