@@ -27,6 +27,7 @@ Now you can proceed with the next steps, building your docker image, pushing it 
 First, you must recover and save your LDAP accreditation codes. You can use the `ldap_fetch.sh` script as follows, where `GASPAR` is your EPFL username:
 ```bash
 ./ldap_fetch.sh GASPAR
+# Optional (include wandb): ./ldap_fetch.sh GASPAR --wandb
 ```
 
 This will store your credentials in the `~/.profile` file, and make them available at startup by sourcing them it to your `.bashrc` or `.zshrc` files.
