@@ -61,9 +61,7 @@ export EPFL_SCRATCH_HOME=$EPFL_SCRATCH_HOME
 fi
 
 if grep "RUNAI_OPTIONS" ~/.profile -q; then
-    if $ENABLE_WANDB && ! grep "RUNAI_OPTIONS+=( --environment WANDB_API_KEY=SECRET:wandb-secret,secret )" ~/.profile -q; then
-        echo "RUNAI_OPTIONS+=( --environment WANDB_API_KEY=SECRET:wandb-secret,secret )" >> ~/.profile
-    fi
+    :
 else
     echo 'export RUNAI_OPTIONS=(
     --run-as-uid $EPFL_UID
@@ -73,10 +71,10 @@ else
     --environment HOME=/home/$EPFL_USER
     --environment SCRATCH_HOME=$EPFL_SCRATCH_HOME
 )' >> ~/.profile
+fi
 
-    if $ENABLE_WANDB; then
-        echo "RUNAI_OPTIONS+=( --environment WANDB_API_KEY=SECRET:wandb-secret,secret )" >> ~/.profile
-    fi
+if $ENABLE_WANDB && ! grep "RUNAI_OPTIONS+=( --environment WANDB_API_KEY=SECRET:wandb-secret,secret )" ~/.profile -q; then
+    echo "RUNAI_OPTIONS+=( --environment WANDB_API_KEY=SECRET:wandb-secret,secret )" >> ~/.profile
 fi
 
 if $ENABLE_WANDB && (! command -v kubectl >/dev/null 2>&1 || ! kubectl get secret wandb-secret >/dev/null 2>&1); then
