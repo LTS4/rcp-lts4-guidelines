@@ -42,6 +42,7 @@ VERSION_NUMBER=$version
 # Do not change the following lines
 CONTAINER=$REGISTRY/$EPFL_GROUPNAME-$EPFL_USER/$IMG_NAME
 
+echo "Starting docker build"
 docker build -t $CONTAINER $path \
 --platform linux/amd64 \
 --build-arg LDAP_GID=$EPFL_GID \
@@ -57,3 +58,5 @@ if [ "$push" == "True" ]; then
     echo "Pushing to $CONTAINER"
     docker push $CONTAINER --all-tags
 fi
+
+echo "Done."
