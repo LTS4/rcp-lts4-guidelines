@@ -1,150 +1,182 @@
-# Getting started with RCP
+# Getting started with RCP (LTS4)
 
-## Requirements
+This repository helps LTS4 members submit jobs to the [RCP CaaS cluster](https://wiki.rcp.epfl.ch/en/home/CaaS).
 
-[This guide](https://wiki.rcp.epfl.ch/home/CaaS/Quick_Start) is a good starting point for the requirements.
+The RCP Wiki gives you a [Quick start guide](https://wiki.rcp.epfl.ch/home/CaaS/Quick_Start), which you can follow. However, we provide a base image which includes pixi and conda, which should cover a lot of use cases and means that you do not necessarily have to build your own image. The setup guide does not cover building your own image and defers to the RCP wiki. 
 
-1. Install docker and sudoless docker. More info on rcp [doc on containers](https://wiki.rcp.epfl.ch/home/CaaS/FAQ/how-to-build-a-container-part1) and [doc on preparing environments](https://wiki.rcp.epfl.ch/home/CaaS/FAQ/how-to-prepare-environment)
-2. Install kubernetes
-   1. follow the kubernetes instructions in the [wiki.rcp.epfl.ch](https://wiki.rcp.epfl.ch/home/CaaS/FAQ/how-to-prepare-environment) to install kubernetes
-   2. if running `kubectl version` gives a `The connection to the server localhost:8080 was refused...` message, you might need to create a `.kube/config` file and run `curl https://wiki.rcp.epfl.ch/public/files/kube-config.yaml -o ~/.kube/config && chmod 600 ~/.kube/config` to configure the cluster
-3. Install runai using the instructions in the wiki
-   1. login to the RunAI platform using `runai login`. You should be able to run `runai whoami` afterwards
-4. `registry.rcp.epfl.ch`
-   1. go to registry.rcp.epfl.ch and login
-   2. create your project with the UI. Your project should be `lts4-$USERNAME`
-   3. login with docker to the registry by `docker login registry.rcp.epfl.ch`
-5. (Optional) Create a wandb secret and name it `wandb-secret`. This is needed for the wandb integration. Follow this link: https://wiki.rcp.epfl.ch/en/home/CaaS/FAQ/how-to-use-secret-wandb
-6. For Visual Studio Code integration, follow this link: https://wiki.rcp.epfl.ch/en/home/CaaS/FAQ/how-to-vscode
-7. `haas`
-   1. Make sure you have access to the `haas` storage by running `ssh $USERNAME@haas001.rcp.epfl.ch` (or `ssh $USERNAME@jumphost.rcp.epfl.ch`, which is the recommended host)
-   2. go to your mounted volume (should be `/mnt/lts4/scratch` for most) and create a directory with your name via `mkdir -p /mnt/lts4/scratch/home/$USERNAME`. The launch script assumes that you have done so.
+> [!IMPORTANT]
+> **Network requirement**: You must be on the EPFL WiFi or connected to the VPN.
 
-Now you can proceed with the next steps, building your docker image, pushing it to the registry and launching jobs.
+> [!IMPORTANT]
+> Using the cluster creates costs. Please be mindful of the resources you use. **Do not forget to stop your jobs when not used!**
 
-## Recover LDAP accreditation
+Content overview:
+- [Setup Guide](#setup-guide)
+  - [1. Setup Tools on Your Machine](#1-setup-tools-on-your-machine)
+  - [2. Login to the Cluster](#2-login-to-the-cluster)
+  - [3. Credentials](#3-ldap-credentials)
+  - [4. (Optional) Weights and biases, HuggingFace, Claude and Codex](#4-optional-weights-and-biases-huggingface-claude-and-codex)
+  - [5. (Optional) Symlinks](#5-optional-symlinks)
+- [Launching jobs](#launching-jobs)
+- [Using VS Code](#using-vs-code)
 
-First, you must recover and save your LDAP accreditation codes. You can use the `ldap_fetch.sh` script as follows, where `GASPAR` is your EPFL username:
+## Setup Guide
+
+#### 1. Setup Tools on Your Machine
+
+#### Install kubectl
+
+Download and install kubectl v1.30.11 (matching the cluster version):
+
+```bash
+# macOS with Apple Silicon
+curl -LO "https://dl.k8s.io/release/v1.30.11/bin/darwin/arm64/kubectl"
+
+# Linux (AMD64)
+# curl -LO "https://dl.k8s.io/release/v1.30.11/bin/linux/amd64/kubectl"
+
+# Install
+chmod +x ./kubectl
+sudo mv ./kubectl /usr/local/bin/kubectl
+sudo chown root: /usr/local/bin/kubectl
+``` 
+
+See https://kubernetes.io/docs/tasks/tools/install-kubectl/ for other platforms.
+
+#### Setup kubeconfig
+
+Download the kube config file to `~/.kube/config`:
+
+```bash
+curl https://wiki.rcp.epfl.ch/public/files/kube-config.yaml -o ~/.kube/config && chmod 600 ~/.kube/config
+```
+
+#### Install run:ai CLI
+
+Download and install the run:ai CLI:
+
+```bash
+# macOS with Apple Silicon
+wget --content-disposition https://rcp-caas-prod.rcp.epfl.ch/cli/darwin
+
+# Linux (replace 'darwin' with 'linux')
+# wget --content-disposition https://rcp-caas-prod.rcp.epfl.ch/cli/linux
+
+# Install
+chmod +x ./runai
+sudo mv ./runai /usr/local/bin/runai
+sudo chown root: /usr/local/bin/runai
+```
+
+### 2. Login to the Cluster
+
+#### Login to run:ai
+
+```bash
+runai login
+```
+
+#### Verify access
+
+```bash
+# List available projects
+runai list projects
+
+# Set your default project
+runai config project lts4-$GASPAR_USERNAME
+```
+
+#### Verify Kubernetes connection
+
+```bash
+kubectl get nodes
+```
+
+You should see the RCP cluster nodes listed.
+
+### 3. LDAP credentials
+
 ```bash
 ./ldap_fetch.sh GASPAR
-# Optional (to include wandb): ./ldap_fetch.sh GASPAR --wandb
 ```
 
-This will store your credentials in the `~/.profile` file, and make them available at startup by sourcing them it to your `.bashrc` or `.zshrc` files.
+This writes **`~/.profile`** only (`EPFL_*` and `RUNAI_OPTIONS` for `publish.sh`, and `csub.py`).
 
-It will also define the `RUNAI_OPTIONS` environment variable, which will allow you to launch jobs with `runai submit`.
 
-## Building your docker image
+### 4. (Optional) Weights and biases, HuggingFace, Claude and Codex
 
-The base image uses a specific pytorch image for reproducibility, adds several libraries, adds the current user.
+For WandB, HF, Claude and Codex in containers, we need to transmit your API keys for these services. You can add these api keys as kubernetes secrets, and csub.py will check if they exist and add them to your job submissions. csub.py recognizes `hf-secret`, `wandb-secret`, `claude-secret` and `codex-secret`.
 
-If you want to add more template images, create a directory in the `dockerfiles` directory and add a `Dockerfile` there.
-Then, make a PR.
+```
+kubectl create secret generic hf-secret --from-literal=secret=$HF_TOKEN
+kubectl create secret generic wandb-secret --from-literal=secret=$WANDB_TOKEN
+```
 
-Then, run the following line to push your image to the registry (if you only want to build the image without pushing it to the registry, omit the `push`).
+### 5. (Optional) Symlinks
+
+You have permanent storage on scratch at /mnt/lts4/scratch/home/$USERNAME. You may want the ephemeral "home" directory on your container to point to some files or directories there, such as your .zshrc.
+
+For this, you can use `symlinks.json`, which is read by csub.py to create symbolic links between scratch and the home directory of your container. You can add a symlink by adding:
+```
+name_of_file_on_scratch: [file, name_of_symlink_in_container]
+OR
+name_of_dir_on_scratch: [dir, name_of_symlink_in_container]
+```
+
+Most of the time, the default symlinks.json will work just fine.
+
+## Launching jobs
+
+`csub.py` generates a Run:AI workload YAML and applies it with `kubectl`. You must pass an image (`-i` full URL or `-si` short name under your Harbor project).
+
+**Interactive job** (default: sleeps for `--time`, default `12h`):
 
 ```bash
-# Before running this command, make sure to change $GASPAR to your epfl username, or declare it as
-# an environment variable
-./publish.sh --path=dockerfiles/base \
-   --img=NAME_OF_YOUR_IMAGE \
-   --version=1 \
-   --push=True
+python csub.py -n my-interactive -si my-image -g 1 --node_type default
+# Or full image URL:
+python csub.py -n my-interactive -i registry.rcp.epfl.ch/lts4-$EPFL_USER/my-image:latest -g 0.8
 ```
 
+Connect to the pod:
 
-## Launching a job
-
-### Using runAI CLI
-
-The official way to launch and interact with jobs is thought the [RunAI command line
-interface](https://docs.run.ai/latest/Researcher/cli-reference/Introduction/).
-In particular using `runai submit`, whose available options are documented [here](https://docs.run.ai/latest/Researcher/cli-reference/runai-submit/).
-
-You need to use the `$RUNAI_OPTIONS`, which is set in your `~/.profile` by the `ldap_fetch.sh` script.
-
-> **Remark:** If you're not a permanent member of LTS4 (PhD or Postdoc), verify that your `EPFL_SCRATCH_HOME` is correctly set:
-> ```bash
-> $ echo $EPFL_SCRATCH_HOME
-> > /mnt/lts4/scratch/students/<gaspar>
-> ```
-
-#### Interactive job
 ```bash
-
-# You can specify a fraction of the GPU to use with the `--gpus` flag
-runai submit $RUNAI_OPTIONS \
-    --name <name-job> \
-    --image registry.rcp.epfl.ch/lts4-$EPFL_USER/<name-image> \
-    --gpus 0.8 \
-    --interactive -- sleep infinity
+runai exec my-interactive -it -- zsh
 ```
 
-#### Training job
+**Training job**:
 
-Supposing that you want to launch the script `train.py` in the `scr` directory of your scratch home
-folder (stored on `haas`), with arguments `--arg1=1 --arg2=2` you can use the following command:
 ```bash
-runai submit $RUNAI_OPTIONS \
-    --name <name-job> \
-    --gpus 1 \
-    --image registry.rcp.epfl.ch/lts4-$EPFL_USER/<name-image> \
-    --command -- /bin/bash -c 'cd $SCRATCH_HOME && python src/train.py --arg1=1 --arg2=2'
+python csub.py -n train-job --train -si my-image -g 1 \
+  --command="cd \$SCRATCH_HOME/myproject && python train.py --epochs 10"
 ```
 
-### Using the launch.py script
+**Dry-run** (print YAML only):
 
-More detailed information coming soon, take a look at the `launch.py` script for now.
-
-#### (Optional) Make the launch script available in your path
-To use the launch script from anywhere, you can add an alias to your `.bashrc` or `.zshrc` file.
 ```bash
-# Add the following line to your .bashrc or .zshrc
-# ...for bash
-echo 'alias rcplaunch="python /path/to/launch.py"' >> ~/.bashrc
-source ~/.bashrc
-
-# ...for zsh
-echo 'alias rcplaunch="python /path/to/launch.py"' >> ~/.zshrc
-source ~/.zshrc
+python csub.py -n test --dry -si my-image -g 0
 ```
 
-> **Remark:** If you're not a permanent member of LTS4 (PhD or Postdoc), include the flag `--student` in the command lines below.
+Useful flags: `--cpus`, `--memory` (e.g. `32G`), `--node_type` (`h100`, `a100-40g`, `default`, …), `--large_shm` / `--no-large_shm`, `--host_ipc`, `--no_symlinks`, `--backofflimit` (train retries).
 
-#### Interactive job
+See also [useful_commands.md](useful_commands.md) and [useful_alias.md](useful_alias.md) for day-to-day Run:AI commands and shell shortcuts.
+
+
+**Non-permanent LTS4 members** (students): check scratch path:
+
 ```bash
-# You can specify a fraction of the GPU to use with the `--gpus` flag
-python launch.py \
-    --name=<name-job> \
-    --gpus=0.8 \
-    --image=registry.rcp.epfl.ch/lts4-$EPFL_USER/<name-image> \
-    --interactive
+echo $EPFL_SCRATCH_HOME
+# Expected: /mnt/lts4/scratch/students/<gaspar>
 ```
 
-#### Training job
+### Job management
+
 ```bash
-python launch.py \
-    --name=NAME_OF_JOB \
-    --gpus=1 \
-    --cpus=20 \
-    --image=registry.rcp.epfl.ch/lts4-$EPFL_USER/<name-image> \
-    --command='cd path/to/code && python train.py --arg1=1 --arg2=2'
+runai list jobs
+runai describe job <name>
+runai logs <name>
+runai logs <name> --pod <name>-0-<n>   # specific retry pod
+runai delete job <name>
 ```
-
-#### Do not launch but only print out the yaml config file
-```bash
-python launch.py \
-    --name=NAME_OF_JOB \
-    --gpus=1 \
-    --cpus=20 \
-    --image=registry.rcp.epfl.ch/lts4-$EPFL_USER/<name-image> \
-    --command='cd path/to/code && python train.py --arg1=1 --arg2=2' \
-    --dry-run
-```
-
-### Checking the status of a job
-
-The status of a job can be checked with the command `runai logs job-name`. If a run fails, runai will launch it again up to 6 times in pods with the name `job-name-0-n`. To check the logs of a specific run, you can run `runai logs job-name --pod job-name-0-n`, where `n` is the number of the pod you want to access.
 
 ## Credits
 
