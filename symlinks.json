@@ -1,0 +1,13 @@
+{
+  ".ssh": ["dir", ".ssh"],
+  ".bashrc": ["file", ".bashrc"],
+  ".profile": ["file", ".profile"],
+  ".zshrc": ["file", ".zshrc"],
+  ".oh-my-zsh": ["dir", ".oh-my-zsh"],
+  ".zsh_history": ["file", ".zsh_history"],
+  ".gitconfig": ["file", ".gitconfig"],
+  ".vscode": ["dir", ".vscode"],
+  ".vscode-server": ["dir", ".vscode-server"],
+  ".cache": ["dir", ".cache"],
+  "conda": ["conda", "conda"]
+}

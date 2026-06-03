@@ -1,7 +1,9 @@
 #!/bin/bash
-# Recover UID and GID from ldaps://ldap.epfl.ch
+# Recover UID/GID from LDAP and set ~/.profile (EPFL_* + RUNAI_OPTIONS).
+# Pod symlinks live in symlinks.json — not written by this script.
 
-ENABLE_WANDB=false
+set -e
+
 LDAP_USERNAME=""
 
 if [[ "$1" = "-h" || "$1" = "--help" ]]; then
@@ -10,26 +12,27 @@ if [[ "$1" = "-h" || "$1" = "--help" ]]; then
 
 SYNOPSIS
     ./ldap_fetch.sh GASPAR
-    ./ldap_fetch.sh GASPAR --wandb
+
+DESCRIPTION
+    Writes EPFL_* variables to ~/.profile (for publish.sh, runai submit, csub.py).
+    Copy symlinks.json.template to symlinks.json for container symlinks.
+    Run 'source ~/.profile' before submitting jobs or building images.
 "
     exit 0
 fi
 
 if [ $# -eq 1 ]; then
     LDAP_USERNAME="$1"
-elif [ $# -eq 2 ] && [[ "$2" = "--wandb" ]]; then
-    ENABLE_WANDB=true
-    LDAP_USERNAME="$1"
 else
-    echo "Usage: ./ldap_fetch.sh GASPAR [--wandb]"
+    echo "Usage: ./ldap_fetch.sh GASPAR"
     exit 1
 fi
 
-if [[ -f ~/.profile ]] && grep "EPFL_USER" ~/.profile -q; then
-    echo "Credentials already in ~/.profile file"
-else
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-    # Require gaspar username
+if [[ -f ~/.profile ]] && grep "EPFL_USER" ~/.profile -q; then
+    echo "Credentials already in ~/.profile"
+else
     if [ -z "$LDAP_USERNAME" ]; then
         echo "GASPAR username required"
         exit 1
@@ -38,11 +41,9 @@ else
     ldap_return=$( ldapsearch -x -b o=epfl,c=ch -H ldaps://ldap.epfl.ch \
         -LLL "(&(objectclass=person)(uid=$LDAP_USERNAME))" uid uidNumber gidNumber )
 
-
     LDAP_UID=$( perl -ne 'print /uidNumber: (.*)/' <<< "$ldap_return" )
     LDAP_GID=$( perl -ne 'print /gidNumber: (.*)/' <<< "$ldap_return" )
-    if grep "ou=lts4" -q <<< "$ldap_return"
-    then
+    if grep "ou=lts4" -q <<< "$ldap_return"; then
         EPFL_SCRATCH_HOME='/mnt/lts4/scratch/home/$EPFL_USER'
     else
         EPFL_SCRATCH_HOME='/mnt/lts4/scratch/students/$EPFL_USER'
@@ -73,24 +74,20 @@ else
 )' >> ~/.profile
 fi
 
-if $ENABLE_WANDB && ! grep "RUNAI_OPTIONS+=( --environment WANDB_API_KEY=SECRET:wandb-secret,secret )" ~/.profile -q; then
-    echo "RUNAI_OPTIONS+=( --environment WANDB_API_KEY=SECRET:wandb-secret,secret )" >> ~/.profile
-fi
-
-if $ENABLE_WANDB && (! command -v kubectl >/dev/null 2>&1 || ! kubectl get secret wandb-secret >/dev/null 2>&1); then
-    echo "Warning: '--wandb' was set but 'wandb-secret' is not available yet (or kubectl is not configured). Re-check requirements for how to set up wandb-secret."
-fi
-
 case $SHELL in
     "/bin/bash") dotfile="$HOME/.bashrc" ;;
     "/bin/zsh") dotfile="$HOME/.zshrc" ;;
     *)
-        echo "Manually add profile loading to your shell rc"
-        exit 0
+        echo "Manually add: source ~/.profile"
+        dotfile=""
         ;;
 esac
 
-if ! grep "source ~/.profile" $dotfile -q; then
-    echo "source ~/.profile" >> $dotfile
+if [[ -n "$dotfile" ]] && ! grep "source ~/.profile" "$dotfile" -q; then
+    echo "source ~/.profile" >> "$dotfile"
     echo "Profile added to $dotfile"
 fi
+
+echo ""
+echo "Next: source ~/.profile"
+echo "Optional: edit $SCRIPT_DIR/symlinks.json for scratch->home symlinks"
